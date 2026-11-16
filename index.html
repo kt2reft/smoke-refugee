@@ -34,12 +34,27 @@
     </div>
   </section>
 
-  <!-- ステージ選択 -->
-  <section id="select" class="screen">
-    <div class="panel">
-      <h2><em>MISSION SELECT</em>今日はどこで吸う？</h2>
-      <div id="stage-list" class="stage-list"></div>
+  <!-- キャラクター選択 -->
+  <section id="chara" class="screen">
+    <div class="sel-head"><em>OPERATIVE SELECT</em>だれで吸う？</div>
+    <div id="chara-list" class="chara-list"></div>
+    <div id="chara-info" class="chara-info frame"></div>
+    <div class="sel-foot">
       <button class="btn back" data-go="title">もどる</button>
+      <button class="btn primary" id="btn-chara-ok"><em>CONFIRM</em>このキャラで行く</button>
+    </div>
+  </section>
+
+  <!-- ミッション選択 -->
+  <section id="select" class="screen">
+    <div class="sel-head"><em>MISSION SELECT</em>今日はどこで吸う？</div>
+    <div class="mission-sel">
+      <div id="stage-list" class="m-list"></div>
+      <div id="m-brief" class="m-brief frame"></div>
+    </div>
+    <div class="sel-foot">
+      <button class="btn back" id="btn-to-chara">キャラ変更</button>
+      <button class="btn primary" id="btn-sortie"><em>START MISSION</em>出撃</button>
     </div>
   </section>
 
@@ -72,6 +87,8 @@
           <li><b>視線</b>：地面の扇形とレーダーに表示。赤くなるほど疑われている。<b>しゃがむ</b>と視線の届く距離が縮む</li>
           <li><b>警戒</b>：見つかると「！」が出て<b>ALERT</b>、怪しまれると<b>CAUTION</b>。右上のレーダーで周囲を確認</li>
           <li><b>紙巻き</b>：回復大・匂い大。<b>加熱式</b>：匂い小・ときどきエラー</li>
+          <li><b>キャラ</b>：5人から選べる。それぞれ足の速さや打たれ強さ、初期装備がちがう</li>
+          <li><b>ミッション</b>：5つのミッションは最初から自由に選べる</li>
           <li><b>「喫」マーク</b>：地図の情報は古い。撤去済みのこともある</li>
           <li><b>店</b>：<span class="tag heat">加</span>加熱式専用　<span class="tag cafe">茶</span>喫茶店（500円・屋内）　<span class="tag conv">コ</span>コンビニ（手洗い＋スプレー）</li>
         </ul>
@@ -121,7 +138,7 @@
       <h2><em>PAUSE</em>ポーズ</h2>
       <button class="btn primary" id="btn-resume">つづける</button>
       <button class="btn" id="btn-retry-p">リトライ</button>
-      <button class="btn" id="btn-menu-p">ステージ選択</button>
+      <button class="btn" id="btn-menu-p">ミッション選択</button>
     </div>
   </section>
 
@@ -134,7 +151,7 @@
       <p id="fail-sub" class="death-sub"></p>
       <div class="row">
         <button class="btn primary" id="btn-retry-f"><em>CONTINUE</em>もう一服（R）</button>
-        <button class="btn" id="btn-menu-f">ステージ選択</button>
+        <button class="btn" id="btn-menu-f">ミッション選択</button>
       </div>
     </div>
   </section>
@@ -147,7 +164,8 @@
       <div class="result-main">
         <div class="rank-wrap"><div id="res-rank" class="rank">S</div><div id="res-code" class="codename"></div></div>
         <table class="stats">
-          <tr><td>ステージ</td><td id="res-stage"></td></tr>
+          <tr><td>ミッション</td><td id="res-stage"></td></tr>
+          <tr><td>担当</td><td id="res-chara"></td></tr>
           <tr><td>帰着時刻</td><td id="res-clock"></td></tr>
           <tr><td>残り時間</td><td id="res-remain"></td></tr>
           <tr><td>舌打ち</td><td id="res-tsk"></td></tr>
@@ -157,13 +175,13 @@
       </div>
       <p id="res-best" class="best"></p>
       <div class="row">
-        <button class="btn primary" id="btn-next">次のステージ</button>
+        <button class="btn primary" id="btn-next">次のミッション</button>
         <button class="btn" id="btn-retry-r">リトライ（R）</button>
       </div>
       <div class="row">
         <button class="btn small" id="btn-share-img">結果画像を保存</button>
         <button class="btn small" id="btn-share-x">Xでシェア</button>
-        <button class="btn small" id="btn-menu-r">ステージ選択</button>
+        <button class="btn small" id="btn-menu-r">ミッション選択</button>
       </div>
     </div>
   </section>

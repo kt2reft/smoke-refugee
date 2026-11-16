@@ -4,6 +4,7 @@ import {
   facadeAtlas, shopAtlas, roofTexture, groundTexture, vendTexture, cardboardTexture, posterTexture, skyMaterial,
 } from './textures.js';
 import { Post } from './post.js';
+import { CHARACTERS } from './characters.js';
 
 export const T = 2;               // 1マスの大きさ（ワールド単位）
 const PLAYER_R = 0.42;
@@ -151,9 +152,11 @@ export class Game {
 
     // 状態
     const p = this.player;
+    const ch = this.character || CHARACTERS[0];
+    this.stats = ch.stats;
     Object.assign(p, {
-      nic: 40, mental: 100, aura: BASE_AURA, mode: 'cig', cigs: 3, battery: 2, money: 800,
-      sprays: 1, gums: 2, hasSmoked: false, smoking: null, torch: false,
+      nic: 40, mental: 100, aura: BASE_AURA, mode: ch.start.mode, cigs: ch.start.cigs, battery: ch.start.battery, money: ch.start.money,
+      sprays: ch.start.sprays, gums: ch.start.gums, hasSmoked: false, smoking: null, torch: false,
       curse: 0, tsk: 0, running: false, crouch: false, streetConfirm: 0, lastCause: '', inLegal: false, contactCd: 0,
     });
     this.elapsed = 0;
@@ -253,6 +256,7 @@ export class Game {
     sun.shadow.normalBias = 0.03;
     scene.add(sun, sun.target);
     this.sun = sun;
+    this.hemi = hemi;
   }
 
   // ------------------------------------------------------------------ ground
@@ -859,7 +863,8 @@ export class Game {
   }
 
   // ------------------------------------------------------------------ people
-  makePerson({ body = 0x2c3e50, legs = 0x22252b, head = 0xe6be9c, hair = 0x2b2420, shoes = 0x1a1a1c, scale = 1, skirt = false, longHair = false, extra } = {}) {
+  makePerson({ body = 0x2c3e50, legs = 0x22252b, head = 0xe6be9c, hair = 0x2b2420, shoes = 0x1a1a1c, scale = 1, skirt = false, longHair = false, hairStyle = 'short', extra } = {}) {
+    if (longHair) hairStyle = 'long';
     const cloth = (c, r = 0.82) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
     const mBody = cloth(body), mLegs = cloth(legs), mSkin = cloth(head, 0.6), mHair = cloth(hair, 0.7), mShoe = cloth(shoes, 0.4);
     const mesh = (g, m, shadow = false) => { const o = new THREE.Mesh(g, m); o.castShadow = shadow; return o; };
@@ -905,16 +910,49 @@ export class Game {
     const hm = mesh(new THREE.SphereGeometry(0.165, 16, 12), mSkin, true);
     hm.scale.set(1, 1.12, 1.06);
     hm.position.y = 0.17;
-    const hr = mesh(new THREE.SphereGeometry(0.178, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), mHair);
-    hr.scale.set(1, 1.08, 1.1);
-    hr.position.set(0, 0.2, -0.02);
+    let tailRef = null;
+    const capLen = hairStyle === 'bob' ? 0.62 : hairStyle === 'buzz' ? 0.42 : 0.55;
+    const hr = mesh(new THREE.SphereGeometry(0.178, 16, 10, 0, Math.PI * 2, 0, Math.PI * capLen), mHair);
+    hr.scale.set(hairStyle === 'bob' ? 1.1 : 1, 1.08, hairStyle === 'bob' ? 1.14 : 1.1);
+    hr.position.set(0, hairStyle === 'buzz' ? 0.19 : 0.2, -0.02);
     const nose = mesh(new THREE.BoxGeometry(0.04, 0.06, 0.05), mSkin);
     nose.position.set(0, 0.15, 0.17);
     headG.add(hm, hr, nose);
-    if (longHair) {
-      const back = mesh(new THREE.BoxGeometry(0.3, 0.34, 0.1), mHair);
-      back.position.set(0, 0.08, -0.13);
+    if (hairStyle === 'long') {
+      const back = mesh(new THREE.BoxGeometry(0.32, 0.46, 0.1), mHair);
+      back.position.set(0, 0.03, -0.14);
       headG.add(back);
+      for (const sx of [-1, 1]) {
+        const side = mesh(new THREE.BoxGeometry(0.05, 0.3, 0.16), mHair);
+        side.position.set(sx * 0.165, 0.1, -0.04);
+        headG.add(side);
+      }
+    } else if (hairStyle === 'bob') {
+      const back = mesh(new THREE.BoxGeometry(0.36, 0.2, 0.14), mHair);
+      back.position.set(0, 0.1, -0.12);
+      headG.add(back);
+      for (const sx of [-1, 1]) {
+        const side = mesh(new THREE.BoxGeometry(0.06, 0.2, 0.22), mHair);
+        side.position.set(sx * 0.17, 0.1, -0.01);
+        headG.add(side);
+      }
+    } else if (hairStyle === 'ponytail') {
+      const knot = mesh(new THREE.SphereGeometry(0.07, 10, 8), mHair);
+      knot.position.set(0, 0.24, -0.17);
+      const tail = mesh(new THREE.CapsuleGeometry(0.05, 0.22, 4, 8), mHair);
+      tail.position.set(0, 0.08, -0.21);
+      tail.rotation.x = 0.25;
+      headG.add(knot, tail);
+      tailRef = tail;
+      for (const sx of [-1, 1]) {
+        const lock = mesh(new THREE.BoxGeometry(0.05, 0.2, 0.08), mHair);
+        lock.position.set(sx * 0.16, 0.12, 0.06);
+        headG.add(lock);
+      }
+      const fringe = mesh(new THREE.BoxGeometry(0.26, 0.06, 0.06), mHair);
+      fringe.position.set(0.03, 0.3, 0.14);
+      fringe.rotation.z = -0.25;
+      headG.add(fringe);
     }
     const arm = side => {
       const sh = new THREE.Group();
@@ -942,27 +980,57 @@ export class Game {
       sk.position.y = -0.22;
       hips.add(sk);
     }
-    const rig = { hips, spine, head: headG, legL: leg(-1), legR: leg(1), armL: arm(-1), armR: arm(1), amt: 0, crouch: 0, mats: [mBody, mLegs, mSkin, mHair, mShoe] };
+    const rig = { hips, spine, head: headG, legL: leg(-1), legR: leg(1), armL: arm(-1), armR: arm(1), amt: 0, crouch: 0, tail: tailRef, mats: [mBody, mLegs, mSkin, mHair, mShoe] };
     root.userData = rig;
     if (extra) extra(root, cloth, rig);
     root.scale.setScalar(scale);
     return root;
   }
 
-  buildPlayer() {
-    const mesh = this.makePerson({
-      body: 0x2a2e37, legs: 0x23262e, hair: 0x1e1a18,
+  setCharacter(c) {
+    this.character = c || CHARACTERS[0];
+    if (this.player && this.scene) {
+      // 選択画面：その場で見た目だけ差し替える
+      const old = this.player.mesh;
+      this.scene.remove(old);
+      old.traverse(o => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+      this.player.mesh = this.makePlayerMesh();
+      this.player.opacity = 1;
+      this.scene.add(this.player.mesh);
+    }
+  }
+
+  makePlayerMesh() {
+    const L = (this.character || CHARACTERS[0]).look;
+    return this.makePerson({
+      body: L.body, legs: L.legs, hair: L.hair, head: L.skin ?? 0xe6be9c, hairStyle: L.hairStyle, skirt: !!L.skirt, scale: L.scale ?? 1,
       extra: (g, mat, rig) => {
-        const tie = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.42, 0.02), mat(0xb3261e, 0.5));
-        tie.position.set(0, 0.36, 0.15);
-        const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 0.02), mat(0xf2f2f2));
-        shirt.position.set(0, 0.56, 0.145);
-        rig.spine.add(tie, shirt);
-        // ビジネスバッグ
-        const bag = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.32, 0.42), mat(0x2a1f18, 0.5));
-        bag.position.set(0, -0.12, 0);
-        bag.castShadow = true;
-        rig.armL.hand.add(bag);
+        if (L.shirt) {
+          const shirt = new THREE.Mesh(new THREE.BoxGeometry(L.tie ? 0.2 : 0.24, L.tie ? 0.18 : 0.14, 0.02), mat(L.shirt));
+          shirt.position.set(0, L.tie ? 0.56 : 0.58, 0.145);
+          rig.spine.add(shirt);
+          rig.mats.push(shirt.material);
+        }
+        if (L.tie) {
+          const tie = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.42, 0.02), mat(L.tie, 0.5));
+          tie.position.set(0, 0.36, 0.15);
+          rig.spine.add(tie);
+          rig.mats.push(tie.material);
+        }
+        if (L.glasses) {
+          const gl = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.03), mat(0x151515, 0.3));
+          gl.position.set(0, 0.2, 0.17);
+          rig.head.add(gl);
+          rig.mats.push(gl.material);
+        }
+        if (L.bag) {
+          const bag = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.4), mat(L.bag, 0.5));
+          bag.position.set(0, -0.12, 0);
+          bag.castShadow = true;
+          rig.armL.hand.add(bag);
+          rig.bag = bag;
+          rig.mats.push(bag.material);
+        }
         const cig = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.24, 6), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }));
         cig.rotation.x = Math.PI / 2;
         cig.position.set(0.04, 0.12, 0.27);
@@ -971,10 +1039,13 @@ export class Game {
         ember.position.set(0.04, 0.12, 0.39);
         ember.visible = false;
         rig.head.add(cig, ember);
-        rig.cig = cig; rig.ember = ember; rig.tie = tie; rig.shirt = shirt; rig.bag = bag;
-        rig.mats.push(tie.material, shirt.material, bag.material);
+        rig.cig = cig; rig.ember = ember;
       },
     });
+  }
+
+  buildPlayer() {
+    const mesh = this.makePlayerMesh();
     let sx = 0, sy = 0;
     for (let y = 0; y < this.H; y++) for (let x = 0; x < this.W; x++) if ('OP'.includes(this.tile(x, y))) { sx = x; sy = y; }
     const [fx, fy] = this.facingOf(sx, sy);
@@ -1402,7 +1473,7 @@ export class Game {
     }
 
     // ニコチン
-    const drain = (100 / 105) * (p.curse > 0 ? 2 : 1) * (p.running ? 1.5 : 1);
+    const drain = (100 / 105) * (p.curse > 0 ? 2 : 1) * (p.running ? 1.5 : 1) * this.stats.drain;
     p.curse = Math.max(0, p.curse - dt);
     if (!p.smoking) p.nic = Math.max(0, p.nic - drain * dt);
     if (p.nic <= 0) {
@@ -1413,7 +1484,7 @@ export class Game {
     p.contactCd = Math.max(0, p.contactCd - dt);
 
     // 匂いの減衰（雨だと早く消える）
-    const tau = this.theme === 'rain' ? 30 : 40;
+    const tau = (this.theme === 'rain' ? 30 : 40) / this.stats.fade;
     p.aura = BASE_AURA + (p.aura - BASE_AURA) * Math.exp(-dt / tau);
 
     // カメラの左右回転（キーボード）
@@ -1474,7 +1545,7 @@ export class Game {
         const c = Math.cos(j), s = Math.sin(j);
         [mx, mz] = [mx * c - mz * s, mx * s + mz * c];
       }
-      const speed = 4.4 * (p.running ? 1.45 : 1) * (p.crouch ? 0.5 : 1) * (p.nic <= 0 ? 0.55 : 1);
+      const speed = 4.4 * this.stats.speed * (p.running ? 1.45 : 1) * (p.crouch ? 0.5 : 1) * (p.nic <= 0 ? 0.55 : 1);
       const nx = p.pos.x + mx * speed * dt;
       if (!this.collide(nx, p.pos.z)) p.pos.x = nx;
       const nz = p.pos.z + mz * speed * dt;
@@ -1689,7 +1760,7 @@ export class Game {
     n.cd = 3.5;
     n.sus = 0.3;
     n.bubbleCd = 2;
-    p.mental -= cfg.dmg * mul;
+    p.mental -= cfg.dmg * mul * this.stats.dmg;
     p.tsk += 1;
     p.lastCause = cfg.cause;
     this.ui.bubble(n.mesh, line || cfg.lines[Math.floor(Math.random() * cfg.lines.length)], 'tsk', 1.4);
@@ -1743,7 +1814,7 @@ export class Game {
     this.shake = 0.6;
     this.alertT = 0;
     this.audio.fail();
-    if (npc) this.ui.bubble(npc.mesh, 'ちょっとお兄さん！', 'tsk', 3);
+    if (npc) this.ui.bubble(npc.mesh, `ちょっと${(this.character || CHARACTERS[0]).call}！`, 'tsk', 3);
     this.ui.onFail({ cause, kind, tsk: this.player.tsk, clock: this.clock(), stage: this.stage });
   }
 
@@ -1784,6 +1855,7 @@ export class Game {
       u.armL.sh.rotation.set(-0.5, 0, 0.3); u.armL.el.rotation.x = -1.9;
       u.armR.sh.rotation.set(-0.5, 0, -0.3); u.armR.el.rotation.x = -1.9;
     }
+    if (u.tail) u.tail.rotation.x = 0.25 + Math.sin(walk * 2) * 0.12 * a + run * 0.35 * a + cr * 0.3;
     if (u.kid) this.animatePerson(u.kid, walk * 1.4, { ...o, head: 0 });
   }
 
@@ -1926,6 +1998,7 @@ export class Game {
 
   updateCamera(dt) {
     const p = this.player;
+    if (this.hemi) { this.hemi.intensity = this.look.hemi[2]; this.scene.environmentIntensity = this.look.env; }
     const cs = this.camState;
     const cam = this.camera;
     const ending = this.over || this.cleared;
@@ -2006,6 +2079,7 @@ export class Game {
     p.pos.set(this.tc(best[0]) + 1, 0, this.tc(best[1]) + 1);
     p.facing = 0.6;
     this.titleMode = true;
+    this.charaYaw = undefined;
   }
 
   titleCam(t) {
@@ -2017,6 +2091,34 @@ export class Game {
     cs.dist = 4.6;
     this.updateCamera(0.016);
     [cs.yaw, cs.pitch, cs.dist] = keep;
+  }
+
+  // キャラクター選択：カメラは開けた方向に固定し、キャラをターンテーブルのように回す
+  charaCam(t) {
+    const p = this.player;
+    if (this.charaYaw === undefined) {
+      let best = 0, bestD = -1;
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        let d = 0.4;
+        while (d < 6 && !this.blockedAt(p.pos.x + Math.sin(a) * d, 1.5, p.pos.z + Math.cos(a) * d, 0.35)) d += 0.2;
+        if (d > bestD) { bestD = d; best = a; }
+      }
+      this.charaYaw = best;
+    }
+    const yaw = this.charaYaw;
+    p.facing = yaw + Math.sin(t * 0.6) * 0.75;
+    const cam = this.camera;
+    const d = 3.3, h = p.gy + 1.15;
+    const side = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)).multiplyScalar(0.55);
+    cam.position.set(p.pos.x + Math.sin(yaw) * d - side.x, h + 0.3, p.pos.z + Math.cos(yaw) * d - side.z);
+    cam.lookAt(p.pos.x - side.x, h, p.pos.z - side.z);
+    this.sky.position.copy(cam.position);
+    // 選択画面は少し明るく（ライトを増やすとシェーダーが重くなるので、環境光を上げる）
+    this.hemi.intensity = this.look.hemi[2] * 2.6;
+    this.scene.environmentIntensity = this.look.env * 2.2;
+    if (p.opacity !== 1) { p.opacity = 1; for (const m of p.mesh.userData.mats) { m.transparent = false; m.opacity = 1; m.depthWrite = true; } }
+    p.mesh.visible = true;
   }
 
   updatePostFx(dt) {

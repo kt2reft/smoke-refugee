@@ -84,6 +84,60 @@ h2 em, .btn em { display: block; font-style: normal; font-family: var(--mono); f
 .stage-card .bs { font-family: var(--mono); font-size: 14px; }
 .stage-card .bs b { font-family: var(--stencil); font-weight: 400; font-size: 24px; color: var(--accent); margin-right: 6px; }
 
+/* operative / mission select（キャラは画面中央に3Dで立たせる） */
+#chara, #select { display: none; flex-direction: column; justify-content: space-between; align-items: stretch; padding: 22px 26px;
+  background: linear-gradient(90deg, rgba(3, 6, 5, 0.85), rgba(3, 6, 5, 0.25) 32%, rgba(3, 6, 5, 0.25) 64%, rgba(3, 6, 5, 0.85)); }
+#chara.show, #select.show { display: flex; }
+#select { background: rgba(3, 6, 5, 0.72); }
+.sel-head { font-weight: 900; font-size: 26px; text-shadow: 0 2px 4px #000; }
+.sel-head em { display: block; font-style: normal; font-family: var(--mono); font-size: 12px; letter-spacing: 0.4em; color: var(--hud); font-weight: 400; }
+.sel-foot { display: flex; justify-content: space-between; gap: 12px; }
+.sel-foot .btn { min-width: 200px; text-align: center; }
+.sel-foot .btn.back { margin-top: 0; }
+
+.chara-list { position: absolute; left: 26px; top: 90px; bottom: 90px; width: 250px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.chara-card { pointer-events: auto; text-align: left; cursor: pointer; color: var(--ink); font-family: var(--font); padding: 10px 14px; position: relative;
+  background: rgba(5, 10, 8, 0.75); border: 1px solid var(--line); border-left: 3px solid var(--hud-dim); }
+.chara-card:hover { background: rgba(169, 240, 184, 0.1); }
+.chara-card.on { border-color: var(--accent); border-left-color: var(--accent); background: rgba(255, 194, 58, 0.12); }
+.chara-card .no { font-family: var(--mono); font-size: 11px; color: var(--hud); letter-spacing: 0.15em; }
+.chara-card .nm { display: block; font-weight: 900; font-size: 17px; }
+.chara-card .rl { font-size: 12px; color: var(--dim); }
+.chara-card .tr { position: absolute; right: 10px; top: 10px; font-size: 11px; color: var(--accent); }
+.chara-info { position: absolute; right: 26px; top: 90px; width: 330px; padding: 16px 18px; }
+.chara-info h3 { margin: 0; font-size: 24px; font-weight: 900; }
+.chara-info .kana { font-family: var(--mono); font-size: 11px; color: var(--hud); letter-spacing: 0.15em; }
+.chara-info .rl { color: var(--dim); font-size: 13px; margin: 2px 0 10px; }
+.chara-info .pf { font-size: 13px; line-height: 1.7; margin: 0 0 12px; }
+.chara-info .trait { border: 1px solid rgba(255, 194, 58, 0.5); padding: 8px 10px; margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
+.chara-info .trait b { color: var(--accent); display: block; font-size: 14px; }
+.stat-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; font-size: 12px; margin: 5px 0; }
+.pips { display: flex; gap: 3px; }
+.pips i { width: 30px; height: 8px; background: rgba(255, 255, 255, 0.12); }
+.pips i.on { background: var(--hud); }
+.kit { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-top: 10px; line-height: 1.7; }
+
+.mission-sel { display: grid; grid-template-columns: minmax(260px, 360px) 1fr; gap: 18px; flex: 1; margin: 16px 0; min-height: 0; }
+.m-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.m-card { pointer-events: auto; text-align: left; cursor: pointer; color: var(--ink); font-family: var(--font); padding: 10px 14px; position: relative;
+  background: rgba(5, 10, 8, 0.75); border: 1px solid var(--line); border-left: 3px solid var(--hud-dim); }
+.m-card:hover { background: rgba(169, 240, 184, 0.1); }
+.m-card.on { border-color: var(--accent); border-left-color: var(--accent); background: rgba(255, 194, 58, 0.12); }
+.m-card .no { font-family: var(--mono); font-size: 11px; color: var(--hud); letter-spacing: 0.2em; }
+.m-card .nm { display: block; font-weight: 900; font-size: 16px; }
+.m-card .rk { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: var(--stencil); font-size: 26px; color: var(--accent); }
+.m-card .rk.none { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.m-brief { padding: 18px 22px; overflow-y: auto; }
+.m-brief .no { font-family: var(--mono); color: var(--hud); letter-spacing: 0.3em; font-size: 12px; }
+.m-brief h3 { margin: 2px 0 10px; font-size: 28px; font-weight: 900; }
+.m-brief .intro { font-size: 15px; line-height: 1.7; border-left: 3px solid var(--accent); padding-left: 12px; margin: 0 0 16px; }
+.m-brief dl { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.m-brief dt { color: var(--dim); font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; padding-top: 2px; }
+.m-brief dd { margin: 0; }
+.m-brief .threat { display: flex; flex-wrap: wrap; gap: 6px; }
+.m-brief .threat span { border: 1px solid var(--line); padding: 1px 8px; font-size: 12px; }
+.m-brief .threat span.hi { border-color: rgba(255, 59, 47, 0.7); color: #ffb3ad; }
+
 /* howto */
 .howto .flow { display: flex; gap: 10px; padding: 0; list-style: none; margin: 0 0 16px; flex-wrap: wrap; }
 .howto .flow li { flex: 1 1 220px; background: rgba(169, 240, 184, 0.05); border-left: 3px solid var(--hud-dim); padding: 10px 12px; font-size: 14px; line-height: 1.6; }
@@ -222,6 +276,17 @@ body.touch .equip { bottom: 10px; transform: scale(0.8); transform-origin: right
 @keyframes pop { from { transform: translate(-50%, -80%) scale(0.6); } to { transform: translate(-50%, -100%) scale(1); } }
 
 @media (max-width: 760px) {
+  #chara, #select { padding: 14px; }
+  .chara-list { position: static; width: auto; flex-direction: row; overflow-x: auto; margin-top: 8px; }
+  .chara-card { min-width: 120px; }
+  .chara-card .tr { display: none; }
+  .chara-info { position: static; width: auto; margin-top: auto; margin-bottom: 8px; padding: 10px 12px; max-height: 38vh; overflow-y: auto; }
+  .chara-info .pf { display: none; }
+  .mission-sel { grid-template-columns: 1fr; }
+  .m-list { flex-direction: row; overflow-x: auto; }
+  .m-card { min-width: 150px; }
+  .m-card .rk { position: static; transform: none; }
+  .sel-foot .btn { min-width: 0; flex: 1; }
   .status { width: 190px; padding: 8px 10px; left: 10px; top: 10px; }
   .hud-clock { font-size: 26px; }
   .gauge { grid-template-columns: 58px 1fr; }

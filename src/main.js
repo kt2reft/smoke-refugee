@@ -3,6 +3,7 @@ import { Game } from './game.js';
 import { UI } from './ui.js';
 import { Audio } from './audio.js';
 import { STAGES } from './stages.js';
+import { CHARACTERS, charById, statStars } from './characters.js';
 
 const $ = id => document.getElementById(id);
 const SAVE_KEY = 'smokeRefugee.save.v1';
@@ -18,6 +19,7 @@ function loadGhost(id) { try { return JSON.parse(localStorage.getItem(GHOST_KEY(
 function writeGhost(id, g) { try { localStorage.setItem(GHOST_KEY(id), JSON.stringify(g)); } catch { /* 容量不足など */ } }
 
 const save = loadSave();
+let chara = charById(save.chara);
 // ?all=1 で全ステージ解放（デバッグ・配信用）
 if (new URLSearchParams(location.search).has('all')) save.unlocked = STAGES.length;
 
@@ -36,6 +38,7 @@ const ui = new UI();
 const audio = new Audio();
 audio.setMuted(save.muted);
 const game = new Game(renderer, ui, audio);
+game.setCharacter(chara);
 
 let state = 'title';
 let stageIdx = 0;
@@ -62,27 +65,95 @@ ui.hud_visible(false);
 function updateSoundBtn() { $('btn-sound').textContent = `音：${save.muted ? 'OFF' : 'ON'}`; }
 updateSoundBtn();
 
+// ミッションごとの説明（ブリーフィング）
+const MISSION_INFO = {
+  s1: { place: 'オフィス街', news: ['基本操作', '撤去済みの灰皿', '上司の匂いチェック'] },
+  s2: { place: '駅前ロータリー', news: ['路上喫煙指導員（見られたら即アウト）', '満員の喫煙所', '風向きの変化'] },
+  s3: { place: '雨の商店街', news: ['雨で紙巻きに火がつかない', '匂いに敏感な人', '喫茶店で上司に遭遇'] },
+  s4: { place: '新幹線の乗り換え', news: ['25分の乗り換え時間', '喫煙ルームのどちらかが閉鎖'] },
+  s5: { place: '親戚の結婚式', news: ['親戚の視線', '母の厳しい匂いチェック'] },
+};
+const NPC_NAME = { walker: '通行人', parent: '子連れ', sensitive: '匂いに敏感な人', guide: '路上喫煙指導員', relative: '親戚', ally: '愛煙家（味方）' };
+let selIdx = 0;
+
 function renderStageList() {
   const list = $('stage-list');
   list.innerHTML = '';
   STAGES.forEach((st, i) => {
     const b = document.createElement('button');
-    b.className = 'stage-card';
+    b.className = `m-card${i === selIdx ? ' on' : ''}`;
     const best = save.best[st.id];
-    const locked = i >= save.unlocked;
-    b.disabled = locked;
-    b.innerHTML = `<span class="no">${st.sub}</span><span class="nm">${locked ? '？？？' : st.name}</span>
-      <span class="ds">${locked ? '前のステージをクリアすると解放' : st.intro}</span>
-      <span class="bs">${best ? `<b>${best.rank}</b>${best.score}点` : locked ? '' : '未クリア'}</span>`;
-    b.addEventListener('click', () => startStage(i));
+    b.innerHTML = `<span class="no">MISSION 0${i + 1}</span><span class="nm">${st.name}</span>
+      <span class="rk${best ? '' : ' none'}">${best ? best.rank : 'NEW'}</span>`;
+    b.addEventListener('click', () => { if (selIdx === i) startStage(i); else { selIdx = i; renderStageList(); audio.beep(); } });
     list.appendChild(b);
   });
+  renderBrief();
+}
+
+function renderBrief() {
+  const st = STAGES[selIdx];
+  const info = MISSION_INFO[st.id] || { place: st.name, news: [] };
+  const best = save.best[st.id];
+  const counts = {};
+  st.npcs.forEach(n => { counts[n.type] = (counts[n.type] || 0) + 1; });
+  const threat = Object.entries(counts).map(([t, n]) => `<span class="${['guide', 'sensitive', 'relative'].includes(t) ? 'hi' : ''}">${NPC_NAME[t] || t} ×${n}</span>`).join('');
+  const goal = { s4: '新幹線に乗車', s5: '式場に戻る' }[st.id] || '職場に戻る';
+  $('m-brief').innerHTML = `<div class="no">MISSION 0${selIdx + 1} ／ ${st.sub}</div><h3>${st.name}</h3>
+    <p class="intro">${st.intro}</p>
+    <dl>
+      <dt>LOCATION</dt><dd>${info.place}</dd>
+      <dt>TIME</dt><dd>${st.startClock} 開始　制限 ${st.minutes} 分</dd>
+      <dt>OBJECTIVE</dt><dd>喫煙所で一服 → 匂いを消して${goal}</dd>
+      <dt>CHECK</dt><dd>${st.goalCheck.who}の匂いチェック</dd>
+      <dt>WEATHER</dt><dd>${st.rain ? '雨（紙巻きに火がつかない）' : '晴れ'}${st.wind.length > 1 ? '　風向きが変わる' : ''}</dd>
+      <dt>THREAT</dt><dd class="threat">${threat}</dd>
+      <dt>NEW</dt><dd>${info.news.join('、')}</dd>
+      <dt>OPERATIVE</dt><dd>${chara.name}（${chara.trait}）</dd>
+      <dt>BEST</dt><dd>${best ? `ランク ${best.rank}　${best.score}点` : '未クリア'}</dd>
+    </dl>`;
+}
+
+function renderCharaList() {
+  const list = $('chara-list');
+  list.innerHTML = '';
+  CHARACTERS.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = `chara-card${c.id === chara.id ? ' on' : ''}`;
+    b.innerHTML = `<span class="no">OPERATIVE 0${i + 1}</span><span class="nm">${c.name}</span><span class="rl">${c.role}・${c.age}歳</span><span class="tr">${c.trait}</span>`;
+    b.addEventListener('click', () => {
+      if (chara.id === c.id) { goMissions(); return; }
+      chara = c;
+      game.setCharacter(c);
+      audio.beep();
+      renderCharaList();
+    });
+    list.appendChild(b);
+  });
+  const st = chara.start;
+  $('chara-info').innerHTML = `<div class="kana">${chara.kana}</div><h3>${chara.name}</h3>
+    <div class="rl">${chara.role}・${chara.age}歳</div>
+    <p class="pf">${chara.profile}</p>
+    <div class="trait"><b>特性：${chara.trait}</b>${chara.traitText}</div>
+    ${statStars(chara).map(([k, v]) => `<div class="stat-row"><span>${k}</span><span class="pips">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= v ? 'on' : ''}"></i>`).join('')}</span></div>`).join('')}
+    <div class="kit">初期装備：${st.mode === 'cig' ? '紙巻き' : '加熱式'}／紙巻き${st.cigs}本・加熱式 電池${st.battery}回<br>消臭スプレー×${st.sprays}　ミントガム×${st.gums}　¥${st.money}</div>`;
+}
+
+function goChara() { state = 'chara'; renderCharaList(); ui.show('chara'); }
+function goMissions() {
+  save.chara = chara.id;
+  writeSave();
+  state = 'select';
+  renderStageList();
+  ui.show('select');
 }
 
 function startStage(i) {
   audio.unlock();
   stageIdx = i;
+  selIdx = i;
   const st = STAGES[i];
+  game.setCharacter(chara);
   game.load(st, loadGhost(st.id));
   state = 'play';
   ui.hideScreens();
@@ -140,11 +211,11 @@ ui.onClearCb = r => {
     save.best[st.id] = { score: r.score, rank: r.rank };
     writeGhost(st.id, r.ghost);
   }
-  save.unlocked = Math.max(save.unlocked, Math.min(STAGES.length, stageIdx + 2));
   writeSave();
   $('res-rank').textContent = r.rank;
   $('res-code').textContent = RANK_CODE[r.rank] || '';
   $('res-stage').textContent = st.name;
+  $('res-chara').textContent = chara.name;
   $('res-clock').textContent = r.clock;
   $('res-remain').textContent = `${Math.floor(r.remain)} 分`;
   $('res-tsk').textContent = `${r.tsk} 回`;
@@ -157,7 +228,7 @@ ui.onClearCb = r => {
 
 // ------------------------------------------------------------ share
 function shareText(r) {
-  return `SMOKE REFUGEE「${r.stage.name}」をランク${r.rank}でクリア。舌打ち${r.tsk}回、残り香${Math.round(r.residual * 100)}%。たった一服のために、ここまでやる。 #SMOKEREFUGEE`;
+  return `SMOKE REFUGEE「${r.stage.name}」を${chara.name}でランク${r.rank}でクリア。舌打ち${r.tsk}回、残り香${Math.round(r.residual * 100)}%。たった一服のために、ここまでやる。 #SMOKEREFUGEE`;
 }
 
 function shareImage(r) {
@@ -206,7 +277,10 @@ function shareImage(r) {
 
 // ------------------------------------------------------------ buttons
 const on = (id, fn) => $(id).addEventListener('click', e => { e.currentTarget.blur(); audio.unlock(); fn(); });
-on('btn-start', () => { renderStageList(); state = 'select'; ui.show('select'); });
+on('btn-start', goChara);
+on('btn-chara-ok', goMissions);
+on('btn-to-chara', goChara);
+on('btn-sortie', () => startStage(selIdx));
 on('btn-howto', () => ui.show('howto'));
 on('btn-sound', () => { save.muted = !save.muted; audio.setMuted(save.muted); writeSave(); updateSoundBtn(); });
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { state = b.dataset.go; ui.show(b.dataset.go); }));
@@ -342,12 +416,12 @@ function frame(now) {
   last = now;
   if (state === 'play') game.update(dt, readInput());
   else if (state === 'fail' || state === 'result') game.update(dt, { x: 0, y: 0, run: false });
-  else if (state === 'title' || state === 'select' || state === 'howto') {
+  else if (state === 'title' || state === 'select' || state === 'howto' || state === 'chara') {
     // タイトル背景：街をゆっくり眺める
     titleT += dt;
     game.time += dt;
     game.updateVisuals(dt);
-    game.titleCam(titleT);
+    if (state === 'chara') game.charaCam(titleT); else game.titleCam(titleT);
   }
   if (state !== 'pause') ui.updateBubbles(game.camera);
   game.render();
