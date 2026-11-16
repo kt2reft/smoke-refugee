@@ -1332,7 +1332,7 @@ export class Game {
   }
 
   // ------------------------------------------------------------------ camera input
-  look(dx, dy) {
+  lookBy(dx, dy) {
     const cs = this.camState;
     cs.yaw -= dx * 0.0032;
     cs.pitch = clamp(cs.pitch + dy * 0.0026, -0.25, 1.15);

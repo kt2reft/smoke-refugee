@@ -319,8 +319,8 @@ const locked = () => document.pointerLockElement === canvas;
 canvas.addEventListener('mousedown', () => { if (state === 'play' && !locked()) lockPointer(); });
 document.addEventListener('mousemove', e => {
   if (state !== 'play') return;
-  if (locked()) game.look(e.movementX, e.movementY);
-  else if (e.buttons & 1 && e.target === canvas) game.look(e.movementX * 1.2, e.movementY * 1.2);
+  if (locked()) game.lookBy(e.movementX, e.movementY);
+  else if (e.buttons & 1 && e.target === canvas) game.lookBy(e.movementX * 1.2, e.movementY * 1.2);
 });
 let lastUnlock = 0;
 document.addEventListener('pointerlockchange', () => {
@@ -380,20 +380,26 @@ document.querySelectorAll('.tb').forEach(b => b.addEventListener('pointerdown', 
   if (a === 'crouch') { game.toggleCrouch(); b.classList.toggle('on', game.player.crouch); }
 }));
 
-// タッチ：画面右側のドラッグで視点
+// タッチ：画面のドラッグで視点（スティックとボタン以外の場所ならどこでも）
 const look = { id: null, x: 0, y: 0 };
 canvas.addEventListener('pointerdown', e => {
-  if (e.pointerType !== 'touch' || state !== 'play' || look.id !== null) return;
+  if (e.pointerType === 'mouse' || state !== 'play' || look.id !== null) return;
   look.id = e.pointerId; look.x = e.clientX; look.y = e.clientY;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* 取れなくても動く */ }
+  e.preventDefault();
 });
 canvas.addEventListener('pointermove', e => {
   if (e.pointerId !== look.id) return;
-  game.look((e.clientX - look.x) * 1.8, (e.clientY - look.y) * 1.8);
+  e.preventDefault();
+  game.lookBy((e.clientX - look.x) * 1.6, (e.clientY - look.y) * 1.4);
   look.x = e.clientX; look.y = e.clientY;
 });
 const endLook = e => { if (e.pointerId === look.id) look.id = null; };
-canvas.addEventListener('pointerup', endLook);
-canvas.addEventListener('pointercancel', endLook);
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => canvas.addEventListener(t, endLook));
+window.addEventListener('pointerup', endLook);
+// ブラウザのスクロールやズームに指を取られないように
+canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
 function readInput() {
   let x = 0, y = 0;
