@@ -73,6 +73,14 @@ export class Audio {
   ok() { this.tone(660, 0.08, { vol: 0.1 }); this.tone(990, 0.12, { vol: 0.1, delay: 0.08 }); }
   bad() { this.tone(300, 0.25, { type: 'sawtooth', vol: 0.12, slide: -150 }); }
   alert() { this.tone(1200, 0.07, { vol: 0.12 }); this.tone(1600, 0.1, { vol: 0.12, delay: 0.08 }); }
+  // 発見された瞬間の「！」
+  exclaim() {
+    this.tone(1318, 0.06, { type: 'square', vol: 0.14 });
+    this.tone(1975, 0.32, { type: 'sawtooth', vol: 0.1, delay: 0.05, slide: 120 });
+    this.tone(988, 0.32, { type: 'square', vol: 0.08, delay: 0.05 });
+    this.noise(0.18, { freq: 5000, q: 0.8, vol: 0.18, delay: 0.04 });
+  }
+  rustle() { this.noise(0.06, { freq: 700, q: 1.2, vol: 0.18 }); }
   error() { for (let i = 0; i < 3; i++) this.tone(180, 0.06, { type: 'square', vol: 0.12, delay: i * 0.09 }); }
   spray() { this.noise(0.5, { freq: 7000, q: 0.4, vol: 0.25, type: 'highpass' }); }
   fail() {

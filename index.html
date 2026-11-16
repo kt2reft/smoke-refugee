@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SMOKE REFUGEE ～失われし灰皿を求めて～</title>
-<meta name="description" content="たった一服のために、ここまでやる。昼休みに喫煙所を探し、匂いを消して職場に戻る3Dステルスコメディ。">
+<meta name="description" content="たった一服のために、ここまでやる。昼休みに喫煙所を探し、匂いを消して職場に戻る3人称視点のタクティカル・スモーキング・アクション。">
 <meta property="og:title" content="SMOKE REFUGEE ～失われし灰皿を求めて～">
 <meta property="og:description" content="たった一服のために、ここまでやる。ブラウザで遊べる3Dステルスコメディ。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@500;700&family=Share+Tech+Mono&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%236b3fa0%22/%3E%3Crect x=%2210%22 y=%2230%22 width=%2236%22 height=%228%22 fill=%22%23fff%22/%3E%3Crect x=%2246%22 y=%2230%22 width=%228%22 height=%228%22 fill=%22%23ff5a1f%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/style.css">
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
@@ -21,12 +21,13 @@
   <!-- タイトル -->
   <section id="title" class="screen show">
     <div class="title-wrap">
-      <p class="kicker">たった一服のために、ここまでやる。</p>
-      <h1 class="logo">SMOKE<br>REFUGEE</h1>
+      <p class="kicker">TACTICAL SMOKING ACTION</p>
+      <h1 class="logo">SMOKE<span>REFUGEE</span></h1>
       <p class="subtitle">～失われし<ruby>灰皿<rt>オアシス</rt></ruby>を求めて～</p>
+      <p class="tagline">たった一服のために、ここまでやる。</p>
       <div class="menu">
-        <button id="btn-start" class="btn primary">はじめる</button>
-        <button id="btn-howto" class="btn">遊び方</button>
+        <button id="btn-start" class="btn primary"><em>START</em>はじめる</button>
+        <button id="btn-howto" class="btn"><em>BRIEFING</em>遊び方</button>
         <button id="btn-sound" class="btn small">音：ON</button>
       </div>
       <p class="notice">このゲームは喫煙を勧めるものではありません。成人向けのコメディ作品です。<br>登場する地名・団体・銘柄はすべて架空です。</p>
@@ -36,7 +37,7 @@
   <!-- ステージ選択 -->
   <section id="select" class="screen">
     <div class="panel">
-      <h2>今日はどこで吸う？</h2>
+      <h2><em>MISSION SELECT</em>今日はどこで吸う？</h2>
       <div id="stage-list" class="stage-list"></div>
       <button class="btn back" data-go="title">もどる</button>
     </div>
@@ -45,7 +46,7 @@
   <!-- 遊び方 -->
   <section id="howto" class="screen">
     <div class="panel howto">
-      <h2>遊び方</h2>
+      <h2><em>BRIEFING</em>遊び方</h2>
       <ol class="flow">
         <li><b>行き</b>　ニコチンが切れる前に喫煙所を探す</li>
         <li><b>一服</b>　喫煙所で <kbd>Space</kbd>。吸った直後から匂いの輪が大きく広がる</li>
@@ -53,8 +54,10 @@
       </ol>
       <div class="cols">
         <table class="keys">
-          <tr><td><kbd>WASD</kbd> / <kbd>↑↓←→</kbd></td><td>移動</td></tr>
+          <tr><td><kbd>WASD</kbd> / <kbd>↑↓</kbd></td><td>移動（カメラの向きが前）</td></tr>
+          <tr><td>マウス / <kbd>←→</kbd></td><td>視点を回す（画面クリックでマウス視点）</td></tr>
           <tr><td><kbd>Shift</kbd></td><td>走る（ニコチン消費1.5倍）</td></tr>
+          <tr><td><kbd>C</kbd></td><td>しゃがむ（遅いが、見つかりにくい）</td></tr>
           <tr><td><kbd>Space</kbd></td><td>一服・店を使う（路上では2回押しで強行）</td></tr>
           <tr><td><kbd>Tab</kbd></td><td>紙巻き ⇄ 加熱式</td></tr>
           <tr><td><kbd>Q</kbd></td><td>消臭スプレー（匂いを大きく消す）</td></tr>
@@ -66,7 +69,8 @@
           <li><b>ニコチン</b>：時間で減る。ゼロになると鈍足・手ブレ・イライラ</li>
           <li><b>メンタル</b>：匂いに気づいた人に見られると舌打ちされて減る。ゼロでアウト</li>
           <li><b>匂いの輪</b>：風下に流れる。紫の輪に入った人は匂いの元を探して振り向く</li>
-          <li><b>視線</b>：黄色の扇形。赤くなるほど疑われている</li>
+          <li><b>視線</b>：地面の扇形とレーダーに表示。赤くなるほど疑われている。<b>しゃがむ</b>と視線の届く距離が縮む</li>
+          <li><b>警戒</b>：見つかると「！」が出て<b>ALERT</b>、怪しまれると<b>CAUTION</b>。右上のレーダーで周囲を確認</li>
           <li><b>紙巻き</b>：回復大・匂い大。<b>加熱式</b>：匂い小・ときどきエラー</li>
           <li><b>「喫」マーク</b>：地図の情報は古い。撤去済みのこともある</li>
           <li><b>店</b>：<span class="tag heat">加</span>加熱式専用　<span class="tag cafe">茶</span>喫茶店（500円・屋内）　<span class="tag conv">コ</span>コンビニ（手洗い＋スプレー）</li>
@@ -78,41 +82,43 @@
 
   <!-- HUD -->
   <section id="hud" class="hidden">
-    <div class="hud-top">
-      <div class="stage-box">
-        <div id="hud-stage" class="hud-stage"></div>
-        <div id="hud-clock" class="hud-clock">12:00</div>
-        <div id="hud-limit" class="hud-limit"></div>
-      </div>
-      <div id="hud-objective" class="objective"></div>
+    <div class="status frame">
+      <div id="hud-stage" class="hud-stage"></div>
+      <div class="clock-row"><span id="hud-clock" class="hud-clock">12:00</span><span id="hud-limit" class="hud-limit"></span></div>
+      <div class="gauge men"><label>MENTAL<small>メンタル</small></label><div class="bar"><i id="g-men"></i></div></div>
+      <div class="gauge nic"><label>NICOTINE<small>ニコチン</small></label><div class="bar"><i id="g-nic"></i></div></div>
+      <div class="gauge aura"><label>ODOR<small>残り香</small></label><div class="bar"><i id="g-aura"></i><em id="g-line"></em></div></div>
+    </div>
+    <div class="mission"><span class="m-label">MISSION</span><span id="hud-objective" class="objective"></span></div>
+    <div class="radar-box frame">
+      <div class="radar-head"><span id="phase" class="phase">RADAR</span><span id="phase-t" class="phase-t"></span></div>
+      <canvas id="radar" width="400" height="400"></canvas>
       <div class="wind-box" title="風向き（匂いは風下へ流れる）">
-        <div class="wind-label">風</div>
-        <div id="wind-arrow" class="wind-arrow">➤</div>
-        <div id="wind-text" class="wind-text"></div>
+        <span class="wind-label">WIND</span><span id="wind-arrow" class="wind-arrow">➤</span><span id="wind-text" class="wind-text"></span>
       </div>
     </div>
-    <div class="gauges">
-      <div class="gauge nic"><span>ニコチン</span><div class="bar"><i id="g-nic"></i></div></div>
-      <div class="gauge men"><span>メンタル</span><div class="bar"><i id="g-men"></i></div></div>
-      <div class="gauge aura"><span>残り香</span><div class="bar"><i id="g-aura"></i><em id="g-line"></em></div></div>
+    <div class="items">
+      <div class="item-box frame" id="box-spray"><span class="key">Q</span><span class="ico" id="ico-spray"></span><span class="nm">消臭スプレー</span><b id="n-spray">1</b></div>
+      <div class="item-box frame" id="box-gum"><span class="key">E</span><span class="ico" id="ico-gum"></span><span class="nm">ミントガム</span><b id="n-gum">2</b></div>
     </div>
-    <div class="inv">
-      <div id="inv-mode" class="mode"></div>
-      <div id="inv-items" class="items"></div>
+    <div class="equip">
+      <div class="equip-box frame"><span class="key">TAB</span><span class="ico" id="eq-icon"></span><div class="eq-text"><span id="eq-name"></span><b id="eq-count"></b></div></div>
+      <div class="equip-sub"><span id="eq-sub"></span><span id="stance" class="stance"></span><span id="money"></span></div>
     </div>
     <div id="hint" class="hint"></div>
-    <canvas id="minimap" width="180" height="120"></canvas>
+    <div id="lookhint" class="lookhint">クリックでマウス視点　／　<kbd>←</kbd><kbd>→</kbd> カメラ回転　／　<kbd>C</kbd> しゃがむ</div>
     <button id="btn-pause" class="btn icon" aria-label="ポーズ">II</button>
   </section>
 
   <div id="bubbles"></div>
   <div id="flash"></div>
-  <div id="toast"></div>
+  <div id="toast"><span class="freq">◆ 145.20</span><span id="toast-text"></span></div>
+  <div id="letterbox"><i></i><i></i></div>
 
   <!-- ポーズ -->
   <section id="pause" class="screen dim">
     <div class="panel small">
-      <h2>ポーズ</h2>
+      <h2><em>PAUSE</em>ポーズ</h2>
       <button class="btn primary" id="btn-resume">つづける</button>
       <button class="btn" id="btn-retry-p">リトライ</button>
       <button class="btn" id="btn-menu-p">ステージ選択</button>
@@ -122,11 +128,12 @@
   <!-- 失敗 -->
   <section id="fail" class="screen dim">
     <div class="panel death">
-      <p class="death-label">死因</p>
+      <p class="death-label">MISSION FAILED</p>
+      <p class="death-k">死因</p>
       <p id="fail-cause" class="death-cause"></p>
       <p id="fail-sub" class="death-sub"></p>
       <div class="row">
-        <button class="btn primary" id="btn-retry-f">もう一服（R）</button>
+        <button class="btn primary" id="btn-retry-f"><em>CONTINUE</em>もう一服（R）</button>
         <button class="btn" id="btn-menu-f">ステージ選択</button>
       </div>
     </div>
@@ -135,9 +142,10 @@
   <!-- クリア -->
   <section id="result" class="screen dim">
     <div class="panel result">
-      <p class="result-label">本日の一服</p>
+      <p class="result-label">MISSION COMPLETE</p>
+      <p class="result-sub">本日の一服</p>
       <div class="result-main">
-        <div id="res-rank" class="rank">S</div>
+        <div class="rank-wrap"><div id="res-rank" class="rank">S</div><div id="res-code" class="codename"></div></div>
         <table class="stats">
           <tr><td>ステージ</td><td id="res-stage"></td></tr>
           <tr><td>帰着時刻</td><td id="res-clock"></td></tr>
@@ -169,6 +177,7 @@
       <button data-act="spray" class="tb">消臭</button>
       <button data-act="gum" class="tb">ガム</button>
       <button data-act="run" class="tb">走る</button>
+      <button data-act="crouch" class="tb">しゃがむ</button>
     </div>
   </div>
 </div>
