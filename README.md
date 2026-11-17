@@ -15,11 +15,7 @@
 
 ## 遊ぶ
 
-GitHub Pages で公開すると、次のURLでそのまま遊べます（リポジトリ名が `smoke-refugee` の場合）。
-
-```
-https://<GitHubのユーザー名>.github.io/smoke-refugee/
-```
+**▶ [https://kt2reft.github.io/smoke-refugee/](https://kt2reft.github.io/smoke-refugee/)**
 
 インストールは不要です。PCのブラウザ（Chrome / Edge / Safari / Firefox）推奨。スマホはタッチ操作に対応しています（左のスティックで移動、画面のドラッグで視点）。
 
