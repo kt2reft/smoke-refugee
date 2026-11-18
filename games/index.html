@@ -227,7 +227,6 @@ table.ctl td:first-child{color:var(--tx);width:44%;white-space:nowrap}
       <span>KT2REFT GAMES<small>ブラウザゲーム作品集</small></span></a>
     <nav>
       <a href="#library">全作品</a>
-      <a class="gh" href="https://github.com/kt2reft" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </div>
 </header>
@@ -254,7 +253,6 @@ table.ctl td:first-child{color:var(--tx);width:44%;white-space:nowrap}
         <div class="pt"><b>インストール不要</b><span>ブラウザだけで動きます。リンクを送れば、相手もそのまま遊べます。</span></div>
         <div class="pt"><b>PC・スマホ・パッド</b><span>キーボード＋マウス、タッチ操作、ゲームパッドに対応（作品により異なります）。</span></div>
         <div class="pt"><b>みんなで遊べる</b><span>同じ画面での協力・対戦や、招待リンクで繋がるオンラインに対応した作品があります。</span></div>
-        <div class="pt"><b>ソースも公開</b><span>各作品のソースコードは GitHub で見られます。</span></div>
       </div>
     </div>
   </div></section>
@@ -263,7 +261,6 @@ table.ctl td:first-child{color:var(--tx);width:44%;white-space:nowrap}
 <footer><div class="wrap">
   <div class="fl">
     <span class="lat">© 2026 kt2reft</span>
-    <a href="https://github.com/kt2reft" target="_blank" rel="noopener">GitHub</a>
   </div>
   <p class="note">このサイトは個人の作品公開ページです。ゲームの販売・課金は一切ありません。「無料」表記は、すべて無償で公開していることを示すものです。<br>
   動作確認：最新の Chrome / Edge / Safari / Firefox。3D 作品は端末の性能によって動作が重くなることがあります。</p>
@@ -282,7 +279,6 @@ const GAMES = [
     lead:"昼休み。切れかけたニコチンを抱えて喫煙所を探し、一服し、匂いを消して、何事もなかった顔で職場に戻る。ステルスゲームの文法で、ただ一服しに行く3人称アクション。",
     desc:"肩越しのカメラ、しゃがみ歩き、レーダー、見つかった瞬間の「！」と ALERT／CAUTION の警戒フェーズ。ステルスゲームの道具立てを全部使って、やることは一服だけ。1ステージは「行きはニコチンとの戦い、帰りは匂いとの戦い」です。",
     url:"https://kt2reft.github.io/smoke-refugee/",
-    repo:"https://github.com/kt2reft/smoke-refugee",
     accent:"#e8b451", accent2:"#d1603a",
     tags:["ステルス","3D","ひとりで","コメディ"],
     cats:["solo","3d"],
@@ -310,7 +306,6 @@ const GAMES = [
     lead:"ヒーロー5人 vs 怪人5人。前半は街で市民と拠点を奪い合い、後半は5人で1体の巨大ロボ／大怪獣に乗り込んで戦う、特撮パーティーアクション。",
     desc:"前半戦は裏方として街を走り回り、市民を運び、拠点を奪う。後半戦は仲間と同じ機体に乗り込み、誰がどの役割を担うかを分担しながら巨大戦へ。オンラインは最大10人、足りない席には Bot が入ります。",
     url:"https://kt2reft.github.io/giga-clash/",
-    repo:"https://github.com/kt2reft/giga-clash",
     accent:"#ffd23f", accent2:"#ff7a59",
     tags:["対戦","協力","オンライン","3D","パッド対応"],
     cats:["multi","online","3d"],
@@ -337,7 +332,6 @@ const GAMES = [
     lead:"寄生体として生まれ、食物連鎖を「わざと喰われて乗っ取る」ことで登っていく3D生態系サバイバル。最初に頂点《ヒグマ》の肉体を奪った寄生体が勝者。",
     desc:"最弱の寄生幼生として小さな生物に寄生し、ひとつ上の階層の捕食者から本気で逃げてアドレナリンを溜める。臨界状態であえて喰われると、その肉体を乗っ取れる。宿主には寿命があり、成熟期に交配すれば子に乗り移れます。階層0〜6、陸・川・沼・海に15種族。",
     url:"https://kt2reft.github.io/parasite-echo/",
-    repo:"https://github.com/kt2reft/parasite-echo",
     accent:"#8fd86a", accent2:"#b07cff",
     tags:["サバイバル","3D","ひとりで","育成"],
     cats:["solo","3d"],
@@ -364,7 +358,6 @@ const GAMES = [
     lead:"1〜4人で遊べる3Dパニック協力ゲーム。同じ画面に集まっても、オンラインでも協力できる。アカウント不要、招待リンクか4文字のコードで参加。",
     desc:"選ばなかった家族は全員、敵に回ります。母・妹・長男・猫・父。それぞれ移動も運搬も癖も違い、人数が増えるほど家の中の騒動も増えていきます。誰か1人でも怒りゲージが100%になれば、ちゃぶ台返し。",
     url:"https://kt2reft.github.io/operation-danran/",
-    repo:"https://github.com/kt2reft/operation-danran",
     accent:"#ff6b5a", accent2:"#ffb347",
     tags:["協力","オンライン","3D","パーティー"],
     cats:["multi","online","3d"],
@@ -391,7 +384,6 @@ const GAMES = [
     lead:"クリーンに漂白された街を、ヤンキーで上書きしていくオープンワールド・アクション。three.js によるブラウザ向け3D実装で、外部アセットは使わずテクスチャもすべてプログラム生成。",
     desc:"市民を感染させ、施設を「角打ち」化し、信号機を破壊して街のルールごと書き換える。ごぼ天ソード、小倉祇園太鼓チャージ、成人式ミッション。現在アルファビルド1.0として公開中です。",
     url:"https://kt2reft.github.io/kita-q-override/",
-    repo:"https://github.com/kt2reft/kita-q-override",
     accent:"#f5a623", accent2:"#b06bff",
     tags:["オープンワールド","3D","ひとりで","アルファ版"],
     cats:["solo","3d"],
@@ -505,7 +497,6 @@ function openGame(id,push=true){
           <div class="p">無料</div>
           <small>インストール・登録不要</small>
           <a class="btn play" href="${g.url}" target="_blank" rel="noopener">▶ 今すぐ遊ぶ</a>
-          <a class="btn ghost" href="${g.repo}" target="_blank" rel="noopener">ソースコード</a>
         </div>
         <div class="box spec">
           <div><dt>プレイ人数</dt><dd>${esc(g.players)}</dd></div>
